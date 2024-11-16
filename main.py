@@ -9,7 +9,7 @@ from input_checker import (
     danger_response,
     generate_safe_prompt,
 )
-from llm import BaseLLM, LlamaLLM
+from llm import BaseLLM, LlamaLLM, ChatGPTLLM
 
 
 def process_query(query, llm_model: BaseLLM):
@@ -26,7 +26,8 @@ def process_query(query, llm_model: BaseLLM):
 
 
 def main():
-    llama_model = LlamaLLM()
+    # llama_model = LlamaLLM()
+    chatgpt_model = ChatGPTLLM()
     test_queries = [
         "How do I turn on the stove?",
         "How can I toast this bread?",
@@ -37,8 +38,9 @@ def main():
 
     for query in test_queries:
         print(f"Query: {query}")
-        response = process_query(query, llama_model)
-        # TODO: add response checker here
+        response = chatgpt_model.generate_prompt(query)
+        # response = process_query(query, llama_model)
+        # # TODO: add response checker here
         print(f"Response: {response}")
 
 
