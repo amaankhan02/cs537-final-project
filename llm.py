@@ -1,5 +1,9 @@
 from abc import ABC, abstractmethod
 
+import google.generativeai as genai
+from openai import OpenAI
+import os
+import requests
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -60,3 +64,28 @@ class MistralLLM(BaseLLM):
 
     def generate_prompt(self, query):
         return f"<s>[INST] {query} [/INST]"
+
+class ChatGPTLLM():
+    def __init__(self):
+        self.client = OpenAI(api_key="")
+        self.messages = []
+        # https://www.geeksforgeeks.org/how-to-use-chatgpt-api-in-python/
+        pass
+
+    def generate_prompt(self,query):
+        self.messages = [{"role": "user", "content": query}]
+        chat = self.client.chat.completions.create(
+            model="gpt-3.5-turbo", messages=self.messages
+        )
+        reply = chat.choices[0].message.content
+        self.messages.append({"role": "assistant", "content": reply})
+        return reply
+
+class GeminiLLM():
+    def __init__(self):
+        genai.configure(api_key="")
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
+
+    def generate_prompt(self, query):
+        response = model.generate_content(query)
+        return response.text
