@@ -72,6 +72,7 @@ class ChatGPTLLM():
         # https://www.geeksforgeeks.org/how-to-use-chatgpt-api-in-python/
         pass
 
+    # TODO: change this function to __call__ since this is producing the response
     def generate_prompt(self,query):
         self.messages = [{"role": "user", "content": query}]
         chat = self.client.chat.completions.create(
