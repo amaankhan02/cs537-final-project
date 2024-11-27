@@ -5,7 +5,7 @@ from openai import OpenAI
 import os
 import requests
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, OpenAIGPTConfig, OpenAIGPTModel
 
 
 class BaseLLM(ABC):
@@ -27,6 +27,7 @@ class BaseLLM(ABC):
 
     def __call__(self, query):
         prompt = self.generate_prompt(query)
+        print(self.device)
         model_inputs = self.tokenizer([prompt], return_tensors="pt").to(self.device)
 
         with torch.no_grad():
@@ -65,6 +66,15 @@ class MistralLLM(BaseLLM):
     def generate_prompt(self, query):
         return f"<s>[INST] {query} [/INST]"
 
+class GPTLLM(BaseLLM):
+    def __init__(self):
+        self.configuration = OpenAIGPTConfig()
+        self.model = OpenAIGPTModel(self.configuration)
+        self.configuration = self.model.config
+
+    def generate_prompt(self, query):
+        return f"<s>[INST] {query} [/INST]"
+
 class ChatGPTLLM():
     def __init__(self):
         self.client = OpenAI(api_key="")
@@ -88,5 +98,5 @@ class GeminiLLM():
         self.model = genai.GenerativeModel('gemini-1.5-flash')
 
     def generate_prompt(self, query):
-        response = model.generate_content(query)
+        response = self.model.generate_content(query)
         return response.text
