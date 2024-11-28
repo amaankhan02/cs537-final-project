@@ -3,14 +3,14 @@ from collections import Counter
 from enum import Enum, auto
 from typing import Dict, List
 
-from input_checker import (
+from src.input_checker import (
     QueryClassification,
     classify_query,
     danger_response,
     generate_safe_prompt,
 )
-from llm import BaseLLM, MistralLLM, LlamaLLM, ChatGPTLLM, GeminiLLM
-from response_checker import ResponseChecker
+from src.llm import BaseLLM, MistralLLM, LlamaLLM, ChatGPTLLM, GeminiLLM
+from src.response_checker import ResponseChecker
 
 
 def process_query(query, llm_model: BaseLLM):
