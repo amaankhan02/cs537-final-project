@@ -5,13 +5,15 @@ class ResponseChecker():
         genai.configure(api_key="")
         self.model = genai.GenerativeModel('gemini-1.5-flash')
 
-    def is_response_dangerous(self, response):
-        to_check = f"Is this safe for children: \"\"\"\n{response}\"\"\". Say yes or no"
+    def is_response_safe(self, response):
+        to_check = f"Is this safe for children: \"\"\"\n{response}\"\"\". Say yes or no. Do not add any extra explanation"
         check = self.model.generate_content(to_check)
-        print("Check text =", check.text)
 
-        if "No" in check.text or "no" in check.text:
-            return True
+        check_text = check.text.lower()
+
+        if ("no" in check_text and check_text.index("no") == 0):
+            # TODO: Make this check account for "no" accurately
+            return False
         
-        return False
+        return True
         
