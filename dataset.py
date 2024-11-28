@@ -2,7 +2,7 @@ from datasets import load_dataset
 import random
 
 class DoNotAnswerDataset:
-    def __init__(self, cache_dir=None):
+    def __init__(self, cache_dir="./data/DoNotAnswer"):
         self.ds = load_dataset("LibrAI/do-not-answer", cache_dir=cache_dir)
         self.train_data = self.ds["train"]
         # TODO: do we need to do any preprocessing here?
