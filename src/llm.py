@@ -3,8 +3,7 @@ import google.generativeai as genai
 import torch
 from openai import OpenAI
 from transformers import OpenAIGPTConfig, OpenAIGPTModel, pipeline
-from structures import ModelName
-from constants import llm_models
+from src.structures import ModelName
 
 class BaseLLM(ABC):
     """Abstract base class for LLMs."""

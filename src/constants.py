@@ -1,5 +1,4 @@
-from src.dataset import DatasetName
-from src.structures import ModelName
+from src.structures import ModelName, DatasetName
 from src.llm import Gemini, GPTMini, LlamaMini
 
 dataset_file_paths = {

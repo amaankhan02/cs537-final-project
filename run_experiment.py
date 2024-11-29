@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
         "--judge_model_name",
         type=str,
         required=True,
-        choices=[name.value for name in llm_models.keys()],
+        choices=[llm_models[name] for name in llm_models.keys()],
         help="Name of the LLM model to use for the judge. Not case-sensitive.",
     )
 
