@@ -1,102 +1,130 @@
 from abc import ABC, abstractmethod
-
 import google.generativeai as genai
-from openai import OpenAI
-import os
-import requests
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, OpenAIGPTConfig, OpenAIGPTModel
+from openai import OpenAI
+from transformers import OpenAIGPTConfig, OpenAIGPTModel, pipeline
 
 
 class BaseLLM(ABC):
-    def __init__(self, model_name, device="cpu"):
-        self.model_name = model_name
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            model_name, padding_side="left"
-        )  # TODO: see if padding_side="right" is better
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model_name, load_in_4bit=True
-        ).to(device)
-        # TODO: figure out what bit model to load ^
-        self.device = device
+    """Abstract base class for LLMs."""
+
+    def __init__(self, system_prompt: str):
+        self._system_prompt = system_prompt
 
     @abstractmethod
-    def generate_prompt(self, query):
-        # TODO: add docstring later
+    def __call__(self, query: str) -> str:
         pass
+    
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+    
+    @property
+    def system_prompt(self) -> str:
+        return self._system_prompt
 
-    def __call__(self, query):
-        prompt = self.generate_prompt(query)
-        print(self.device)
-        model_inputs = self.tokenizer([prompt], return_tensors="pt").to(self.device)
 
-        with torch.no_grad():
-            # TODO: figure out what hyperparameters to use here. just used some default values
-            generated_ids = self.model.generate(
-                **model_inputs,
-                max_new_tokens=100,
-                do_sample=True,
-                temperature=0.7,
-                top_p=0.95,
-                pad_token_id=self.tokenizer.eos_token_id,
-            )
+class LlamaMini(BaseLLM):
+    def __init__(
+        self, system_prompt: str, temperature: float = 0.7, do_sample: bool = True
+    ):
+        """Load the Llama-3.2-1B-Instruct model and set the system prompt.
 
-        generated_text = self.tokenizer.batch_decode(
-            generated_ids, skip_special_tokens=True
-        )[0]
-        response = generated_text[len(prompt) :].strip()
+        Args:
+            temperature (float, optional): _description_. Defaults to 0.7.
+            do_sample (bool, optional): _description_. Defaults to True.
+
+            If you want the response to be more for more precise tasks,
+            set temperature to 0.0 and do_sample to False.
+            For more creative tasks, set temperature to 0.7 and do_sample to True.
+        """
+        super().__init__(system_prompt)
+
+        model_id = "meta-llama/Llama-3.2-1B-Instruct"
+        self.pipe = pipeline(
+            "text-generation",
+            model=model_id,
+            torch_dtype=torch.bfloat16,
+            device_map="auto",
+        )
+        self.temperature = temperature
+        self.do_sample = do_sample
+        self.max_new_tokens = 256 # TODO: What is a good value for this?
+
+    @property
+    def device(self):
+        return self.pipe.device
+
+    def __call__(self, query: str) -> str:
+        messages = [
+            {"role": "system", "content": self._system_prompt},
+            {"role": "user", "content": query},
+        ]
+
+        response = self.pipe(
+            messages,
+            max_new_tokens=self.max_new_tokens,  # Adjust as needed
+            temperature=self.temperature,
+            do_sample=self.do_sample,
+        )[0]["generated_text"]
+
+        # TODO: do i need to return response[-1]['content']
         return response
 
-    def __repr__(self):
-        return f"BaseLLM(model_name={self.model_name}, device={self.device})"
+    @property
+    def name(self) -> str:
+        return "LlamaMini"
 
 
-class LlamaLLM(BaseLLM):
-    def __init__(self):
-        super().__init__("meta-llama/Llama-2-7b-chat-hf")
+# class GPTLLM(BaseLLM):
+#     def __init__(self):
+#         self.configuration = OpenAIGPTConfig()
+#         self.model = OpenAIGPTModel(self.configuration)
+#         self.configuration = self.model.config
 
-    def generate_prompt(self, query):
-        return f"[INST] {query} [/INST]"
+#     def generate_prompt(self, query):
+#         return f"<s>[INST] {query} [/INST]"
 
 
-class MistralLLM(BaseLLM):
-    def __init__(self):
-        super().__init__("mistralai/Mistral-7B-v0.1")
+class GPTMini(BaseLLM):
+    def __init__(self, system_prompt: str):
+        super().__init__(system_prompt)
 
-    def generate_prompt(self, query):
-        return f"<s>[INST] {query} [/INST]"
-
-class GPTLLM(BaseLLM):
-    def __init__(self):
-        self.configuration = OpenAIGPTConfig()
-        self.model = OpenAIGPTModel(self.configuration)
-        self.configuration = self.model.config
-
-    def generate_prompt(self, query):
-        return f"<s>[INST] {query} [/INST]"
-
-class ChatGPTLLM():
-    def __init__(self):
         self.client = OpenAI(api_key="")
+        self.model_id = "gpt-4o-mini"
         self.messages = []
         # https://www.geeksforgeeks.org/how-to-use-chatgpt-api-in-python/
-        pass
+        # TODO: @Yug figure out how to set the system prompt for GPT. The system prompt is where you add the prompt injections.
 
-    # TODO: change this function to __call__ since this is producing the response
-    def generate_prompt(self,query):
+    def __call__(self, query: str) -> str:
         self.messages = [{"role": "user", "content": query}]
         chat = self.client.chat.completions.create(
-            model="gpt-3.5-turbo", messages=self.messages
+            model=self.model_id, messages=self.messages
         )
         reply = chat.choices[0].message.content
         self.messages.append({"role": "assistant", "content": reply})
         return reply
 
-class GeminiLLM():
-    def __init__(self):
-        genai.configure(api_key="")
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+    @property
+    def name(self) -> str:
+        return "GPTMini"
 
-    def generate_prompt(self, query):
+
+class Gemini(BaseLLM):
+    def __init__(self, system_prompt: str):
+        super().__init__(system_prompt)
+
+        genai.configure(api_key="")
+        self.model = genai.GenerativeModel("gemini-1.5-flash")
+
+        # TODO: @Yug figure out how to set the system prompt for Gemini. The system prompt is where you add the prompt injections.
+
+    def __call__(self, query: str) -> str:
         response = self.model.generate_content(query)
         return response.text
+    
+    @property
+    def name(self) -> str:
+        return "Gemini"
+

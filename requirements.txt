@@ -1,0 +1,6 @@
+deprecated
+datasets
+transformers
+torch
+openai
+google-generativeai

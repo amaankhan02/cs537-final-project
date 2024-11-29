@@ -1,9 +1,11 @@
+# This file is purely for testing purposes. It is renamed from the original main.py
+
 import re
 from collections import Counter
 from enum import Enum, auto
 from typing import Dict, List
 
-from src.input_checker import (
+from src.bow_model import (
     QueryClassification,
     classify_query,
     danger_response,
