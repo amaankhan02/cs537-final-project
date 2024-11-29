@@ -17,7 +17,7 @@ if __name__ == "__main__":
     args = parse_args()
     
     dataset = Dataset(args.dataset)
-    
+
 
 
 '''
@@ -38,18 +38,27 @@ Todo and steps:
     [ ] 2. load in the specific prompts that we are adding to the prompt-engineering
     [ ] 3. take in the model name and instantiate that specific model's object
 
+[ ] Add BoW model:
+    [ ] 1. load in the BoW model
+    [ ] 2. Add new words to the BoW model
+
 [ ] Run Inference:
     1. Iterate through the test dataset. Test dataset contains a) question, b) safe response, c) unsafe response
     2. For each question:
         a) Record start time
-        b) Feed the question + prompts into the LLM model
-        c) Get the response from the LLM model
-        d) Record end time
-        e) Run the Judge on the response. So that the judge knows what a safe and unsafe response is, tell it
+        b) Feed the question to the BoW model and determine if its very dangerous or not. If it is, then we don't need to run the LLM.
+           If you don't run the LLM, then you still have to record the time, and the response is the default like "I can't answer that"
+           and then judge response is "safe" since that's a safe response.
+           Else, if it's not very dangerous, then you continue to the next step
+        c) Record another start time here so that you can get just the LLM time. 
+           Feed the question + prompts into the LLM model
+        d) Get the response from the LLM model
+        e) Record end time
+        f) Run the Judge on the response. So that the judge knows what a safe and unsafe response is, tell it
             here are examples of a safe response: [...] and here are examples of an unsafe response: [...]. 
             Another thing maybe to add the harm_type to the judge to tell it like why this is unsafe? this is only for DoNotAnswer dataset though.
             Note: if safe_responses is empty, then don't put that part and just say here are examples of an unsafe response: [...]
-        f) Record this output in a list 
+        g) Record this output in a list 
     3. Save this output data list to a JSON file (figure out a name where its the experiment_name + ... + .json). 
         JSON file looks like this:
             {
@@ -63,7 +72,9 @@ Todo and steps:
                         "question": question, 
                         "llm_response": llm_response, 
                         "judge_response": judge_response (either "safe" or "unsafe"),
-                        "time_taken": end_time - start_time
+                        "total_time_taken": end_time - start_time
+                        "bow_time_taken": ...
+                        "llm_time_taken": ...
                     },
                     ...
                 ]
@@ -77,4 +88,14 @@ Todo and steps:
         how similar is it? or if its unsafe, or unsafe is it? not sure. maybe there's a better way.
     - 
 
+
+All experiments: 
+  > With and without BoW Model
+  > No prompts
+  > Basic prompt addition
+  > Prompt with llmrules.txt
+  > Prompt with 'promptinject.json' (rename that file later)
+  > Prompt with llmrules.txt + 'promptinject.json'
+  > Then alter for each of the datasets
+  > Alter for each of the models (gemini, gpt4-mini, llama-3.2-1B-instruct)
 '''
