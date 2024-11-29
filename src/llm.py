@@ -93,16 +93,15 @@ class GPTMini(BaseLLM):
 
         self.client = OpenAI(api_key="")
         self.model_id = "gpt-4o-mini"
-        self.messages = []
         # https://www.geeksforgeeks.org/how-to-use-chatgpt-api-in-python/
 
     def __call__(self, query: str) -> str:
-        self.messages = [{"role": "system", "content": self._system_prompt}, {"role": "user", "content": query}]
+        messages = [{"role": "system", "content": self._system_prompt}, {"role": "user", "content": query}]
         chat = self.client.chat.completions.create(
-            model=self.model_id, messages=self.messages
+            model=self.model_id, messages=messages
         )
         reply = chat.choices[0].message.content
-        self.messages.append({"role": "assistant", "content": reply})
+        # self.messages.append({"role": "assistant", "content": reply})   # if we are keeping track of the history for subsequent calls we can use this
         return reply
 
     @property
