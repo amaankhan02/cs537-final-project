@@ -6,13 +6,13 @@ from typing import List, Optional
 from src.bow_model import BowModel
 from src.constants import judge_system_prompt
 from src.dataset import Dataset
-from src.llm import BaseLLM
-from src.structures import DataClassEncoder, ExperimentResult, Label
+from src.llm import BaseLLM, create_llm
+from src.structures import DataClassEncoder, ExperimentResult, Label, ModelName
 
 
 class Judge:
-    def __init__(self):
-        self.model: BaseLLM = None
+    def __init__(self, model_name: ModelName):
+        self.model: BaseLLM = create_llm(model_name.value, judge_system_prompt)
         self.system_prompt = judge_system_prompt
         # TODO: based on whatever model we're using, ensure that the model for this is not creative and more precise. simply chooses the most probable response intead of a randomizer
 
@@ -104,7 +104,7 @@ def run_inference_and_eval(
     # Create final output
     output = ExperimentResult(
         dataset_name=dataset._name.value,
-        model_name=llm_model.name,
+        model_name=llm_model.name.value,
         system_prompt=llm_model.system_prompt,
         experiment_name=experiment_name,
         accuracy=accuracy,

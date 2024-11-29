@@ -4,13 +4,8 @@ from src.bow_model import BowModel
 from src.constants import llm_models, experiment_outputs_dir
 from src.dataset import Dataset, DatasetName
 from src.evaluate import Judge, run_inference_and_eval
-from src.structures import DatasetName
-
-
-def load_llm(model_name: str, system_prompt: str):
-    if model_name not in llm_models:
-        raise ValueError(f"Model {model_name} not supported")
-    return llm_models[model_name](system_prompt)
+from src.llm import create_llm
+from src.structures import DatasetName, ModelName
 
 
 def parse_args() -> argparse.Namespace:
@@ -61,6 +56,13 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="Path to the prompt injection file",
     )
+    parser.add_argument(
+        "--judge_model_name",
+        type=str,
+        required=True,
+        choices=[name.value for name in llm_models.keys()],
+        help="Name of the LLM model to use for the judge. Not case-sensitive.",
+    )
 
     args = parser.parse_args()
 
@@ -77,25 +79,22 @@ def read_prompt_injections(prompt_injection_path: str) -> str:
     with open(prompt_injection_path, "r") as file:
         return file.read()
 
-
-if __name__ == "__main__":
-    args = parse_args()
-
+def main(args: argparse.Namespace):
     system_prompt = read_prompt_injections(args.prompt_injection_path)
-    dataset = Dataset(DatasetName(args.dataset))
-    llm_model = load_llm(args.model, system_prompt)
-    if args.use_bow:    
-        bow_model = BowModel(args.bow_path, args.danger_threshold)
-    else:
-        bow_model = None
-    judge = Judge()
-
     output_filepath = get_save_filepath(args.experiment_name)
+    
+    dataset = Dataset(DatasetName(args.dataset))
+    llm_model = create_llm(args.model, system_prompt)
+    bow_model = BowModel(args.bow_path, args.danger_threshold) if args.use_bow else None
+    judge = Judge(ModelName(args.judge_model_name))
 
     run_inference_and_eval(
         args.experiment_name, output_filepath, dataset, llm_model, bow_model, judge
     )
 
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
 
 """
 Todo and steps: 

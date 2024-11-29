@@ -3,7 +3,8 @@ import google.generativeai as genai
 import torch
 from openai import OpenAI
 from transformers import OpenAIGPTConfig, OpenAIGPTModel, pipeline
-
+from structures import ModelName
+from constants import llm_models
 
 class BaseLLM(ABC):
     """Abstract base class for LLMs."""
@@ -17,7 +18,7 @@ class BaseLLM(ABC):
     
     @property
     @abstractmethod
-    def name(self) -> str:
+    def name(self) -> ModelName:
         pass
     
     @property
@@ -73,8 +74,8 @@ class LlamaMini(BaseLLM):
         return response
 
     @property
-    def name(self) -> str:
-        return "LlamaMini"
+    def name(self) -> ModelName:
+        return ModelName.LLAMA
 
 
 # class GPTLLM(BaseLLM):
@@ -107,8 +108,8 @@ class GPTMini(BaseLLM):
         return reply
 
     @property
-    def name(self) -> str:
-        return "GPTMini"
+    def name(self) -> ModelName:
+        return ModelName.GPT
 
 
 class Gemini(BaseLLM):
@@ -125,6 +126,10 @@ class Gemini(BaseLLM):
         return response.text
     
     @property
-    def name(self) -> str:
-        return "Gemini"
+    def name(self) -> ModelName:
+        return ModelName.GEMINI
 
+def create_llm(model_name: str, system_prompt: str) -> BaseLLM:
+    if model_name.lower() not in llm_models:
+        raise ValueError(f"Model {model_name} not supported")
+    return llm_models[model_name.lower()](system_prompt)
