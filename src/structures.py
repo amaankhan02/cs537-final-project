@@ -8,8 +8,8 @@ class DatasetName(str, Enum):
     DIFFICULT_DONOTANSWER = "DifficultDoNotAnswer"   
     
     # the custom dataset that we create ourselves more specific for smart-homes
-    SMARTHOME_CHILD_SAFETY = "SmartHomeChildSafety"  # TODO: think of a better name
-    
+    SMARTHOME_CHILD_SAFETY = "SmartHomeChildSafety"  # TODO: think of a better name    
+
 @dataclass
 class Sample:
     """Represents a single sample from the dataset, storing the query, safe responses, unsafe responses, and any other relevant information."""

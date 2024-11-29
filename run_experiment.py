@@ -1,15 +1,26 @@
 from src.dataset import DatasetName, Dataset
 from src.structures import ExperimentResult, Sample, DatasetName, DataClassEncoder
+from src.llm import GPTMini, Gemini, LlamaMini
+from src.constants import llm_models
 import argparse
+
+def load_llm(model_name: str):
+    if model_name not in llm_models:
+        raise ValueError(f"Model {model_name} not supported")
+    return llm_models[model_name]()
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Run safety evaluation experiment')
     parser.add_argument('--dataset', type=str, required=True, 
                        choices=[name.value for name in DatasetName],
                        help='Name of dataset to use')
+    parser.add_argument('--model', type=str, required=True, 
+                       choices=llm_models.keys(),
+                       help='Name of model to use')
     args = parser.parse_args()
     
     args.dataset = DatasetName(args.dataset)
+    args.model = load_llm(args.model)
     
     return args
 
@@ -17,6 +28,9 @@ if __name__ == "__main__":
     args = parse_args()
     
     dataset = Dataset(args.dataset)
+    llm_model = args.model
+    
+    
 
 
 
