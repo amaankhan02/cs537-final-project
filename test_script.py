@@ -1,3 +1,5 @@
+# This file is purely for testing purposes. It is renamed from the original main.py
+
 import re
 from collections import Counter
 from enum import Enum, auto
