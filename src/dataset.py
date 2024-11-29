@@ -1,77 +1,82 @@
 # from datasets import load_dataset
-import random
-from deprecated import deprecated
-from typing import List, Dict, Any
-from structures import DatasetName, Sample
-from constants import dataset_file_paths
 import json
+import random
+from typing import List, Iterator
+
 from datasets import load_dataset
+from deprecated import deprecated
+
+from constants import dataset_file_paths
+from structures import DatasetName, Sample
+
 
 class Dataset:
-    def __init__(self, name: DatasetName): 
+    def __init__(self, name: DatasetName):
         """Constructor for the Abstract Base Dataset class.
 
         Args:
             name (DatasetName): Name of the dataset
             data_path (str): Path to the dataset
         """
-        self.name: DatasetName = name
-        self.data_path: str = dataset_file_paths[name]
-        self.samples: List[Sample] = []
+        self._name: DatasetName = name
+        self._data_path: str = dataset_file_paths[name]
+        self._samples: List[Sample] = []
         self._load_data()
-    
-    
+
     def _load_data(self):
-        if self.name == DatasetName.DIFFICULT_DONOTANSWER:
-            self.samples = self._load_difficult_donotanswer_data() 
-        elif self.name == DatasetName.SMARTHOME_CHILD_SAFETY:
-            self.samples = self._load_smarthome_child_safety_data()
-            
+        if self._name == DatasetName.DIFFICULT_DONOTANSWER:
+            self._samples = self._load_difficult_donotanswer_data()
+        elif self._name == DatasetName.SMARTHOME_CHILD_SAFETY:
+            self._samples = self._load_smarthome_child_safety_data()
+
     def _load_difficult_donotanswer_data(self) -> List[Sample]:
-        with open(self.data_path, "r") as f:
+        with open(self._data_path, "r") as f:
             data = json.load(f)
-        
+
         ret = []
         for entry in data:
             sample = Sample(
-                query=entry["question"],    
+                query=entry["question"],
                 safe_responses=entry["safe_responses"],
                 unsafe_responses=entry["unsafe_responses"],
-                harm_type=entry["harm_type"]
+                harm_type=entry["harm_type"],
             )
             ret.append(sample)
         return ret
-    
+
     def _load_smarthome_child_safety_data(self) -> List[Sample]:
-        with open(self.data_path, "r") as f:
+        with open(self._data_path, "r") as f:
             data = json.load(f)
-        
+
         ret = []
-        for entry in data['questions']:
+        for entry in data["questions"]:
             sample = Sample(
-                query=entry["question"],    
+                query=entry["question"],
                 safe_responses=entry["safeAnswers"],
                 unsafe_responses=entry["unsafeAnswers"],
-                harm_type=None
+                harm_type=None,
             )
             ret.append(sample)
-        return ret  
-    
-    def __len__(self):
-        return len(self.samples)
+        return ret
 
-    def __getitem__(self, index):
-        return self.samples[index]
+    def __len__(self) -> int:
+        return len(self._samples)
+
+    def __getitem__(self, index: int) -> Sample:
+        return self._samples[index]
+
+    def __iter__(self) -> Iterator[Sample]:
+        return iter(self._samples)
     
     @property
-    def samples(self) -> List[Sample]:
-        return self.samples
-    
+    def data_path(self) -> str:
+        return self._data_path
+
     @property
     def name(self) -> DatasetName:
-        return self.name
-    
-    
+        return self._name
+
+
 @deprecated(reason="We're not using the entire DoNotAnswer dataset anymore.")
 class OriginalDoNotAnswerDataset:
     def __init__(self, cache_dir="./data/DoNotAnswer"):
@@ -99,4 +104,3 @@ class OriginalDoNotAnswerDataset:
             return self.train_data[index]
         else:
             raise IndexError("Index out of range")
-        

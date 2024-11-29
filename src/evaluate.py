@@ -4,10 +4,11 @@ import time
 from typing import List, Optional
 
 from src.bow_model import BowModel
+from src.constants import judge_system_prompt
 from src.dataset import Dataset
 from src.llm import BaseLLM
 from src.structures import DataClassEncoder, ExperimentResult, Label
-from src.constants import judge_system_prompt
+
 
 class Judge:
     def __init__(self):
@@ -53,7 +54,7 @@ def run_inference_and_eval(
     bow_times: List[float] = []
     llm_times: List[float] = []
 
-    for sample in dataset.samples:
+    for sample in dataset:
         # Start timing total process
         start_time = time.time()
 
@@ -103,7 +104,7 @@ def run_inference_and_eval(
 
     # Create final output
     output = ExperimentResult(
-        dataset_name=dataset.name.value,
+        dataset_name=dataset._name.value,
         model_name=llm_model.name,
         system_prompt=llm_model.system_prompt,
         experiment_name=experiment_name,
