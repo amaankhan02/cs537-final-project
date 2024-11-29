@@ -1,10 +1,68 @@
-from datasets import load_dataset
+# from datasets import load_dataset
 import random
 from deprecated import deprecated
+from typing import List, Dict, Any
+from structures import DatasetName, Sample
+import json
 
+class Dataset:
+    def __init__(self, name: DatasetName, data_path: str): 
+        """Constructor for the Abstract Base Dataset class.
 
+        Args:
+            name (DatasetName): Name of the dataset
+            data_path (str): Path to the dataset
+        """
+        self.name: DatasetName = name
+        self.data_path: str = data_path
+        self.samples: List[Sample] = []
+        self._load_data()
+    
+    
+    def _load_data(self):
+        if self.name == DatasetName.DIFFICULT_DONOTANSWER:
+            self.samples = self._load_difficult_donotanswer_data() 
+        elif self.name == DatasetName.SMARTHOME_CHILD_SAFETY:
+            self.samples = self._load_smarthome_child_safety_data()
+            
+    def _load_difficult_donotanswer_data(self) -> List[Sample]:
+        with open(self.data_path, "r") as f:
+            data = json.load(f)
+        
+        ret = []
+        for entry in data:
+            sample = Sample(
+                query=entry["question"],    
+                safe_responses=entry["safe_responses"],
+                unsafe_responses=entry["unsafe_responses"]
+            )
+            ret.append(sample)
+        return ret
+    
+    def _load_smarthome_child_safety_data(self) -> List[Sample]:
+        with open(self.data_path, "r") as f:
+            data = json.load(f)
+        
+        ret = []
+        for entry in data['questions']:
+            sample = Sample(
+                query=entry["question"],    
+                safe_responses=entry["safeAnswers"],
+                unsafe_responses=entry["unsafeAnswers"]
+            )
+            ret.append(sample)
+        return ret  
+    
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, index):
+        return self.samples[index]
+    
+    
+    
 @deprecated(reason="We're not using the entire DoNotAnswer dataset anymore.")
-class DoNotAnswerDataset:
+class OriginalDoNotAnswerDataset:
     def __init__(self, cache_dir="./data/DoNotAnswer"):
         self.ds = load_dataset("LibrAI/do-not-answer", cache_dir=cache_dir)
         self.train_data = self.ds["train"]
@@ -30,10 +88,4 @@ class DoNotAnswerDataset:
             return self.train_data[index]
         else:
             raise IndexError("Index out of range")
-
-
-if __name__ == "__main__":
-    # testing the code here
-    dataset = DoNotAnswerDataset()
-    sample = dataset.get_random_sample()
-    print(sample)
+        
