@@ -1,7 +1,8 @@
 from src.dataset import DatasetName, Dataset
 from src.structures import ExperimentResult, Sample, DatasetName, DataClassEncoder
-from src.llm import GPTMini, Gemini, LlamaMini
+from src.llm import BaseLLM
 from src.constants import llm_models
+from src.bow_model import BowModel
 import argparse
 
 def load_llm(model_name: str, system_prompt: str):
@@ -17,18 +18,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--model', type=str, required=True, 
                        choices=llm_models.keys(),
                        help='Name of model to use')
+    parser.add_argument('--danger_threshold', type=int, default=0, required=False,
+                        help='The threshold for the score to be considered dangerous. Defaults to 0.')
+    parser.add_argument('--bow_path', type=str, required=True,
+                        help="Path to the bag of words model's dangerous word list")
     args = parser.parse_args()
     
-    args.dataset = DatasetName(args.dataset)
-    args.model = load_llm(args.model)
-    
     return args
+
+def run_inference_and_eval(dataset: Dataset, llm_model: BaseLLM, bow_model: BowModel):
+    pass 
 
 if __name__ == "__main__":
     args = parse_args()
     
-    dataset = Dataset(args.dataset)
-    llm_model = args.model
+    # TODO: figure out how you're gonna read in the prompt injections and then pass it into load_llm()
+    system_prompt = ""
+    dataset = Dataset(DatasetName(args.dataset))
+    llm_model = load_llm(args.model, system_prompt)
+    bow_model = BowModel(args.bow_path, args.danger_threshold)
     
     
 
@@ -52,9 +60,9 @@ Todo and steps:
     [ ] 2. load in the specific prompts that we are adding to the prompt-engineering
     [X] 3. take in the model name and instantiate that specific model's object
 
-[ ] Add BoW model:
-    [ ] 1. load in the BoW model
-    [ ] 2. Add new words to the BoW model
+[X] Add BoW model:
+    [X] 1. load in the BoW model
+    [X] 2. Add new words to the BoW model
 
 [ ] Run Inference:
     1. Iterate through the test dataset. Test dataset contains a) question, b) safe response, c) unsafe response
@@ -110,6 +118,7 @@ All experiments:
   > Prompt with llmrules.txt
   > Prompt with 'promptinject.json' (rename that file later)
   > Prompt with llmrules.txt + 'promptinject.json'
+  > Prompt with harm_types from DoNotAnswer dataset. Add this to the best performing prompt from above?
   > Then alter for each of the datasets
   > Alter for each of the models (gemini, gpt4-mini, llama-3.2-1B-instruct)
 '''

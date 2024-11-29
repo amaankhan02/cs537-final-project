@@ -1,2 +1,3 @@
 __pycache__
 data/DoNotAnswer/*
+data/bow_dangerous_words.txt

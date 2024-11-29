@@ -1,8 +1,5 @@
-import os
 from abc import ABC, abstractmethod
-
 import google.generativeai as genai
-import requests
 import torch
 from openai import OpenAI
 from transformers import OpenAIGPTConfig, OpenAIGPTModel, pipeline
