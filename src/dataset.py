@@ -3,10 +3,11 @@ import random
 from deprecated import deprecated
 from typing import List, Dict, Any
 from structures import DatasetName, Sample
+from constants import dataset_file_paths
 import json
 
 class Dataset:
-    def __init__(self, name: DatasetName, data_path: str): 
+    def __init__(self, name: DatasetName): 
         """Constructor for the Abstract Base Dataset class.
 
         Args:
@@ -14,7 +15,7 @@ class Dataset:
             data_path (str): Path to the dataset
         """
         self.name: DatasetName = name
-        self.data_path: str = data_path
+        self.data_path: str = dataset_file_paths[name]
         self.samples: List[Sample] = []
         self._load_data()
     
@@ -59,6 +60,13 @@ class Dataset:
     def __getitem__(self, index):
         return self.samples[index]
     
+    @property
+    def samples(self) -> List[Sample]:
+        return self.samples
+    
+    @property
+    def name(self) -> DatasetName:
+        return self.name
     
     
 @deprecated(reason="We're not using the entire DoNotAnswer dataset anymore.")
