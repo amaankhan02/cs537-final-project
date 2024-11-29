@@ -4,10 +4,10 @@ from src.llm import GPTMini, Gemini, LlamaMini
 from src.constants import llm_models
 import argparse
 
-def load_llm(model_name: str):
+def load_llm(model_name: str, system_prompt: str):
     if model_name not in llm_models:
         raise ValueError(f"Model {model_name} not supported")
-    return llm_models[model_name]()
+    return llm_models[model_name](system_prompt)
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Run safety evaluation experiment')
@@ -48,9 +48,9 @@ Todo and steps:
     so that only questions with at least one unsafe response is present. 
 
 [ ] Parsing args and loading:
-    [ ] 1. load in the specific test dataset that we are using here
+    [X] 1. load in the specific test dataset that we are using here
     [ ] 2. load in the specific prompts that we are adding to the prompt-engineering
-    [ ] 3. take in the model name and instantiate that specific model's object
+    [X] 3. take in the model name and instantiate that specific model's object
 
 [ ] Add BoW model:
     [ ] 1. load in the BoW model
