@@ -1,11 +1,13 @@
 from datasets import load_dataset
 import random
+from deprecated import deprecated
 
+
+@deprecated(reason="We're not using the entire DoNotAnswer dataset anymore.")
 class DoNotAnswerDataset:
     def __init__(self, cache_dir="./data/DoNotAnswer"):
         self.ds = load_dataset("LibrAI/do-not-answer", cache_dir=cache_dir)
         self.train_data = self.ds["train"]
-        # TODO: do we need to do any preprocessing here?
 
     def get_random_sample(self):
         return random.choice(self.train_data)
@@ -28,7 +30,6 @@ class DoNotAnswerDataset:
             return self.train_data[index]
         else:
             raise IndexError("Index out of range")
-        
 
 
 if __name__ == "__main__":
