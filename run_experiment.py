@@ -1,10 +1,11 @@
 import argparse
+from typing import List, Optional
 
 from src.bow_model import BowModel
 from src.constants import llm_models, experiment_outputs_dir
 from src.dataset import Dataset, DatasetName
 from src.evaluate import Judge, run_inference_and_eval
-from src.llm import create_llm
+from src.llm import BaseLLM, create_llm
 from src.structures import DatasetName, ModelName
 
 
@@ -63,30 +64,42 @@ def parse_args() -> argparse.Namespace:
         choices=[name.value for name in llm_models.keys()],
         help="Name of the LLM model to use for the judge. Not case-sensitive.",
     )
+    parser.add_argument(
+        "--rules_path",
+        type=str,
+        required=True,
+        help="Path to the rules file indicating what are safe and unsafe for children",
+    )
 
     args = parser.parse_args()
 
     return args
 
+def load_rules_file(rules_path: str) -> List[str]:
+    with open(rules_path, 'r') as file:
+        rules = [line.strip() for line in file.readlines() if line.strip()]
+        return rules
 
 def get_save_filepath(experiment_name: str) -> str:
     import os
 
     os.makedirs(experiment_outputs_dir, exist_ok=True)
-    return f"{experiment_outputs_dir}/{experiment_name}_results.json"
+    # TODO: add the dataset name to the filepath
+    return f"{experiment_outputs_dir}/{experiment_name}_{args.dataset}_{args.model}_bow-{args.use_bow}_results.json"
 
 def read_prompt_injections(prompt_injection_path: str) -> str:
     with open(prompt_injection_path, "r") as file:
         return file.read()
 
 def main(args: argparse.Namespace):
-    system_prompt = read_prompt_injections(args.prompt_injection_path)
-    output_filepath = get_save_filepath(args.experiment_name)
+    system_prompt: str = read_prompt_injections(args.prompt_injection_path)
+    output_filepath: str = get_save_filepath(args.experiment_name)
+    llm_rules: List[str] = load_rules_file(args.rules_path)
     
     dataset = Dataset(DatasetName(args.dataset))
-    llm_model = create_llm(args.model, system_prompt)
-    bow_model = BowModel(args.bow_path, args.danger_threshold) if args.use_bow else None
-    judge = Judge(ModelName(args.judge_model_name))
+    llm_model: BaseLLM = create_llm(args.model, system_prompt)
+    bow_model: Optional[BowModel] = BowModel(args.bow_path, args.danger_threshold) if args.use_bow else None
+    judge: Judge = Judge(ModelName(args.judge_model_name), llm_rules)
 
     run_inference_and_eval(
         args.experiment_name, output_filepath, dataset, llm_model, bow_model, judge

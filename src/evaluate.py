@@ -11,10 +11,14 @@ from src.structures import DataClassEncoder, ExperimentResult, Label, ModelName
 
 
 class Judge:
-    def __init__(self, model_name: ModelName):
-        self.model: BaseLLM = create_llm(model_name.value, judge_system_prompt)
-        self.system_prompt = judge_system_prompt
-        # TODO: based on whatever model we're using, ensure that the model for this is not creative and more precise. simply chooses the most probable response intead of a randomizer
+    def __init__(self, model_name: ModelName, rules: List[str]):
+        self._rules: List[str] = rules # rules indicating what are safe and unsafe for children
+        self._system_prompt: str = self._create_judge_system_prompt()
+        self.model: BaseLLM = create_llm(model_name.value, self._system_prompt)
+        
+        # TODO: based on whatever model we're using, ensure that the model for this 
+        # is not creative and more precise. simply chooses the most probable response
+        # intead of a randomizer
 
     def is_safe(
         self,
@@ -39,6 +43,10 @@ class Judge:
             return False
         else:
             raise ValueError(f"Judge returned invalid output: {output}")
+    
+    def _create_judge_system_prompt(self) -> str:
+        return judge_system_prompt.format(self._rules)
+        
 
 
 def run_inference_and_eval(
@@ -107,6 +115,7 @@ def run_inference_and_eval(
         model_name=llm_model.name.value,
         system_prompt=llm_model.system_prompt,
         experiment_name=experiment_name,
+        use_bow=bow_model is not None,
         accuracy=accuracy,
         average_total_time_taken=statistics.mean(total_times),
         average_bow_time_taken=statistics.mean(bow_times),

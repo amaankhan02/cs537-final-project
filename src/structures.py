@@ -40,6 +40,7 @@ class ExperimentResult:
     model_name: str
     system_prompt: str      # the prompt injections that were used
     experiment_name: str
+    use_bow: bool
     accuracy: float
     average_total_time_taken: float
     average_bow_time_taken: float
