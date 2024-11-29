@@ -96,7 +96,6 @@ class GPTMini(BaseLLM):
         self.model_id = "gpt-4o-mini"
         self.messages = []
         # https://www.geeksforgeeks.org/how-to-use-chatgpt-api-in-python/
-        # TODO: @Yug figure out how to set the system prompt for GPT. The system prompt is where you add the prompt injections.
 
     def __call__(self, query: str) -> str:
         self.messages = [{"role": "system", "content": self._system_prompt}, {"role": "user", "content": query}]
