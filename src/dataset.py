@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 from structures import DatasetName, Sample
 from constants import dataset_file_paths
 import json
+from datasets import load_dataset
 
 class Dataset:
     def __init__(self, name: DatasetName): 
