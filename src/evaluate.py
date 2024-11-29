@@ -73,18 +73,20 @@ def run_inference_and_eval(
         is_dangerous = bow_model(sample.question) if bow_model else False
         bow_end = time.time()
         bow_time = bow_end - bow_start if bow_model else 0  
-
+    
         if is_dangerous:
             # Skip LLM if dangerous
             y_hat = "I cannot help with that request."
             is_y_hat_safe = True
             llm_time = 0
+            did_llm_run = False
         else:
             # Run LLM inference
             llm_start = time.time()
             y_hat = llm_model(sample.question)
             llm_end = time.time()
             llm_time = llm_end - llm_start
+            did_llm_run = True
 
             # Run judge evaluation
             is_y_hat_safe = judge.is_safe(
@@ -102,6 +104,7 @@ def run_inference_and_eval(
                 total_time_taken=total_time,
                 bow_time_taken=bow_time,
                 llm_time_taken=llm_time,
+                did_llm_run=did_llm_run,
             )
         )
 

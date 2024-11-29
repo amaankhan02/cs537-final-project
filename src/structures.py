@@ -32,6 +32,7 @@ class Label:
     total_time_taken: float
     bow_time_taken: float
     llm_time_taken: float
+    did_llm_run: bool
     
 @dataclass
 class ExperimentResult:
