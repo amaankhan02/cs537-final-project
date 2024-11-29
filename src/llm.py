@@ -99,7 +99,7 @@ class GPTMini(BaseLLM):
         # TODO: @Yug figure out how to set the system prompt for GPT. The system prompt is where you add the prompt injections.
 
     def __call__(self, query: str) -> str:
-        self.messages = [{"role": "user", "content": query}]
+        self.messages = [{"role": "system", "content": self._system_prompt}, {"role": "user", "content": query}]
         chat = self.client.chat.completions.create(
             model=self.model_id, messages=self.messages
         )
@@ -117,9 +117,9 @@ class Gemini(BaseLLM):
         super().__init__(system_prompt)
 
         genai.configure(api_key="")
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
-
-        # TODO: @Yug figure out how to set the system prompt for Gemini. The system prompt is where you add the prompt injections.
+        
+        # Set system instruction as the system prompt (https://ai.google.dev/gemini-api/docs/system-instructions?lang=python)
+        self.model = genai.GenerativeModel("gemini-1.5-flash",  system_instruction=system_prompt)
 
     def __call__(self, query: str) -> str:
         response = self.model.generate_content(query)
