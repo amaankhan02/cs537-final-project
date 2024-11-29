@@ -6,8 +6,8 @@ from typing import List, Iterator
 from datasets import load_dataset
 from deprecated import deprecated
 
-from constants import dataset_file_paths
-from structures import DatasetName, Sample
+from src.constants import dataset_file_paths
+from src.structures import DatasetName, Sample
 
 
 class Dataset:

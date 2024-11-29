@@ -3,8 +3,7 @@ import google.generativeai as genai
 import torch
 from openai import OpenAI
 from transformers import OpenAIGPTConfig, OpenAIGPTModel, pipeline
-from structures import ModelName
-from constants import llm_models
+from src.structures import ModelName
 
 class BaseLLM(ABC):
     """Abstract base class for LLMs."""
@@ -94,17 +93,15 @@ class GPTMini(BaseLLM):
 
         self.client = OpenAI(api_key="")
         self.model_id = "gpt-4o-mini"
-        self.messages = []
         # https://www.geeksforgeeks.org/how-to-use-chatgpt-api-in-python/
-        # TODO: @Yug figure out how to set the system prompt for GPT. The system prompt is where you add the prompt injections.
 
     def __call__(self, query: str) -> str:
-        self.messages = [{"role": "user", "content": query}]
+        messages = [{"role": "system", "content": self._system_prompt}, {"role": "user", "content": query}]
         chat = self.client.chat.completions.create(
-            model=self.model_id, messages=self.messages
+            model=self.model_id, messages=messages
         )
         reply = chat.choices[0].message.content
-        self.messages.append({"role": "assistant", "content": reply})
+        # self.messages.append({"role": "assistant", "content": reply})   # if we are keeping track of the history for subsequent calls we can use this
         return reply
 
     @property
@@ -117,9 +114,9 @@ class Gemini(BaseLLM):
         super().__init__(system_prompt)
 
         genai.configure(api_key="")
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
-
-        # TODO: @Yug figure out how to set the system prompt for Gemini. The system prompt is where you add the prompt injections.
+        
+        # Set system instruction as the system prompt (https://ai.google.dev/gemini-api/docs/system-instructions?lang=python)
+        self.model = genai.GenerativeModel("gemini-1.5-flash",  system_instruction=system_prompt)
 
     def __call__(self, query: str) -> str:
         response = self.model.generate_content(query)
