@@ -35,7 +35,8 @@ class Dataset:
             sample = Sample(
                 query=entry["question"],    
                 safe_responses=entry["safe_responses"],
-                unsafe_responses=entry["unsafe_responses"]
+                unsafe_responses=entry["unsafe_responses"],
+                harm_type=entry["harm_type"]
             )
             ret.append(sample)
         return ret
@@ -49,7 +50,8 @@ class Dataset:
             sample = Sample(
                 query=entry["question"],    
                 safe_responses=entry["safeAnswers"],
-                unsafe_responses=entry["unsafeAnswers"]
+                unsafe_responses=entry["unsafeAnswers"],
+                harm_type=None
             )
             ret.append(sample)
         return ret  

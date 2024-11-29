@@ -9,11 +9,20 @@ class BaseLLM(ABC):
     """Abstract base class for LLMs."""
 
     def __init__(self, system_prompt: str):
-        self.system_prompt = system_prompt
+        self._system_prompt = system_prompt
 
     @abstractmethod
     def __call__(self, query: str) -> str:
         pass
+    
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+    
+    @property
+    def system_prompt(self) -> str:
+        return self._system_prompt
 
 
 class LlamaMini(BaseLLM):
@@ -49,7 +58,7 @@ class LlamaMini(BaseLLM):
 
     def __call__(self, query: str) -> str:
         messages = [
-            {"role": "system", "content": self.system_prompt},
+            {"role": "system", "content": self._system_prompt},
             {"role": "user", "content": query},
         ]
 
@@ -62,6 +71,10 @@ class LlamaMini(BaseLLM):
 
         # TODO: do i need to return response[-1]['content']
         return response
+
+    @property
+    def name(self) -> str:
+        return "LlamaMini"
 
 
 # class GPTLLM(BaseLLM):
@@ -93,6 +106,10 @@ class GPTMini(BaseLLM):
         self.messages.append({"role": "assistant", "content": reply})
         return reply
 
+    @property
+    def name(self) -> str:
+        return "GPTMini"
+
 
 class Gemini(BaseLLM):
     def __init__(self, system_prompt: str):
@@ -106,3 +123,8 @@ class Gemini(BaseLLM):
     def __call__(self, query: str) -> str:
         response = self.model.generate_content(query)
         return response.text
+    
+    @property
+    def name(self) -> str:
+        return "Gemini"
+

@@ -1,48 +1,94 @@
-from src.dataset import DatasetName, Dataset
-from src.structures import ExperimentResult, Sample, DatasetName, DataClassEncoder
-from src.llm import BaseLLM
-from src.constants import llm_models
-from src.bow_model import BowModel
 import argparse
+
+from src.bow_model import BowModel
+from src.constants import llm_models, experiment_outputs_dir
+from src.dataset import Dataset, DatasetName
+from src.evaluate import Judge, run_inference_and_eval
+from src.structures import DatasetName
+
 
 def load_llm(model_name: str, system_prompt: str):
     if model_name not in llm_models:
         raise ValueError(f"Model {model_name} not supported")
     return llm_models[model_name](system_prompt)
 
+
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Run safety evaluation experiment')
-    parser.add_argument('--dataset', type=str, required=True, 
-                       choices=[name.value for name in DatasetName],
-                       help='Name of dataset to use')
-    parser.add_argument('--model', type=str, required=True, 
-                       choices=llm_models.keys(),
-                       help='Name of model to use')
-    parser.add_argument('--danger_threshold', type=int, default=0, required=False,
-                        help='The threshold for the score to be considered dangerous. Defaults to 0.')
-    parser.add_argument('--bow_path', type=str, required=True,
-                        help="Path to the bag of words model's dangerous word list")
-    args = parser.parse_args()
+    parser = argparse.ArgumentParser(description="Run safety evaluation experiment")
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        required=True,
+        choices=[name.value for name in DatasetName],
+        help="Name of dataset to use",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        required=True,
+        choices=llm_models.keys(),
+        help="Name of model to use",
+    )
+    parser.add_argument(
+        "--danger_threshold",
+        type=int,
+        default=0,
+        required=False,
+        help="The threshold for the score to be considered dangerous. Defaults to 0.",
+    )
+    parser.add_argument(
+        "--bow_path",
+        type=str,
+        required=True,
+        help="Path to the bag of words model's dangerous word list",
+    )
+    parser.add_argument(
+        "--experiment_name",
+        type=str,
+        required=True,
+        help="Name of the experiment",
+    )
+    parser.add_argument(
+        "--prompt_injection_path",
+        type=str,
+        required=True,
+        help="Path to the prompt injection file",
+    )
+    # TODO: add any new arguments here
     
+    args = parser.parse_args()
+
     return args
 
-def run_inference_and_eval(dataset: Dataset, llm_model: BaseLLM, bow_model: BowModel):
-    pass 
+
+def get_save_filepath(experiment_name: str) -> str:
+    import os
+
+    os.makedirs(experiment_outputs_dir, exist_ok=True)
+    return f"{experiment_outputs_dir}/{experiment_name}_results.json"
+
+def read_prompt_injections(prompt_injection_path: str) -> str:
+    with open(prompt_injection_path, "r") as file:
+        return file.read()
+
 
 if __name__ == "__main__":
     args = parse_args()
-    
-    # TODO: figure out how you're gonna read in the prompt injections and then pass it into load_llm()
-    system_prompt = ""
+
+    system_prompt = read_prompt_injections(args.prompt_injection_path)
     dataset = Dataset(DatasetName(args.dataset))
     llm_model = load_llm(args.model, system_prompt)
     bow_model = BowModel(args.bow_path, args.danger_threshold)
-    
-    
+    judge = Judge()
+
+    output_filepath = get_save_filepath(args.experiment_name)
+
+    run_inference_and_eval(
+        args.experiment_name, output_filepath, dataset, llm_model, bow_model, judge
+    )
 
 
-
-'''
+"""
 Todo and steps: 
 
 [X] Preprocesssing of DoNotAnswer dataset:
@@ -55,16 +101,16 @@ Todo and steps:
     the safe_responses could be empty. However, the unsafe_responses will never be empty since the parquet file have been filtered
     so that only questions with at least one unsafe response is present. 
 
-[ ] Parsing args and loading:
+[X] Parsing args and loading:
     [X] 1. load in the specific test dataset that we are using here
-    [ ] 2. load in the specific prompts that we are adding to the prompt-engineering
+    [X] 2. load in the specific prompts that we are adding to the prompt-engineering
     [X] 3. take in the model name and instantiate that specific model's object
 
 [X] Add BoW model:
     [X] 1. load in the BoW model
     [X] 2. Add new words to the BoW model
 
-[ ] Run Inference:
+[X] Run Inference:
     1. Iterate through the test dataset. Test dataset contains a) question, b) safe response, c) unsafe response
     2. For each question:
         a) Record start time
@@ -105,13 +151,14 @@ Todo and steps:
                 "median_time_taken": median time taken for the LLM to respond
             }
             
-[ ] Future thins to think about or implement:
+Future things to think about or implement:
     - Judge Metrics: could we do like a similarity metric between the response and the safe/unsafe response? that way if it is safe,
         how similar is it? or if its unsafe, or unsafe is it? not sure. maybe there's a better way.
     - 
 
 
 All experiments: 
+  > default model, no bow, no prompts -- baseline - do for each of the models and datasets
   > With and without BoW Model
   > No prompts
   > Basic prompt addition
@@ -121,4 +168,4 @@ All experiments:
   > Prompt with harm_types from DoNotAnswer dataset. Add this to the best performing prompt from above?
   > Then alter for each of the datasets
   > Alter for each of the models (gemini, gpt4-mini, llama-3.2-1B-instruct)
-'''
+"""
