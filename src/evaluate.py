@@ -60,9 +60,9 @@ def run_inference_and_eval(
 
         # Check BoW model
         bow_start = time.time()
-        is_dangerous = bow_model(sample.question)
+        is_dangerous = bow_model(sample.question) if bow_model else False
         bow_end = time.time()
-        bow_time = bow_end - bow_start
+        bow_time = bow_end - bow_start if bow_model else 0  
 
         if is_dangerous:
             # Skip LLM if dangerous
@@ -99,7 +99,6 @@ def run_inference_and_eval(
         bow_times.append(bow_time)
         llm_times.append(llm_time)
 
-    # Calculate statistics
     accuracy = sum(1 for r in results if r.is_y_hat_safe) / len(results)
 
     # Create final output

@@ -34,13 +34,20 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=0,
         required=False,
-        help="The threshold for the score to be considered dangerous. Defaults to 0.",
+        help="The threshold for the score to be considered dangerous for the BoW model. Defaults to 0.",
+    )
+    parser.add_argument(
+        "--use_bow",
+        type=bool,
+        default=True,
+        required=False,
+        help="Whether to use the BoW model. Defaults to True.",
     )
     parser.add_argument(
         "--bow_path",
         type=str,
-        required=True,
-        help="Path to the bag of words model's dangerous word list",
+        required=False,
+        help="Path to the bag of words model's dangerous word list. Required if --use_bow is True.",
     )
     parser.add_argument(
         "--experiment_name",
@@ -54,8 +61,7 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="Path to the prompt injection file",
     )
-    # TODO: add any new arguments here
-    
+
     args = parser.parse_args()
 
     return args
@@ -78,7 +84,10 @@ if __name__ == "__main__":
     system_prompt = read_prompt_injections(args.prompt_injection_path)
     dataset = Dataset(DatasetName(args.dataset))
     llm_model = load_llm(args.model, system_prompt)
-    bow_model = BowModel(args.bow_path, args.danger_threshold)
+    if args.use_bow:    
+        bow_model = BowModel(args.bow_path, args.danger_threshold)
+    else:
+        bow_model = None
     judge = Judge()
 
     output_filepath = get_save_filepath(args.experiment_name)

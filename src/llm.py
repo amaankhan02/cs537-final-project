@@ -32,8 +32,8 @@ class LlamaMini(BaseLLM):
         """Load the Llama-3.2-1B-Instruct model and set the system prompt.
 
         Args:
-            temperature (float, optional): _description_. Defaults to 0.7.
-            do_sample (bool, optional): _description_. Defaults to True.
+            temperature (float, optional): Defaults to 0.7.
+            do_sample (bool, optional): Defaults to True.
 
             If you want the response to be more for more precise tasks,
             set temperature to 0.0 and do_sample to False.
