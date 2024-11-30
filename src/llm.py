@@ -54,7 +54,7 @@ class LlamaMini(BaseLLM):
         )
         self.temperature = temperature
         self.do_sample = do_sample
-        self.max_new_tokens = 256 # TODO: What is a good value for this?
+        self.max_new_tokens = 512 # TODO: What is a good value for this?
 
     @property
     def device(self):

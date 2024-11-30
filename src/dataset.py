@@ -36,7 +36,7 @@ class Dataset:
         ret = []
         for entry in data:
             sample = Sample(
-                query=entry["question"],
+                question=entry["question"],
                 safe_responses=entry["safe_responses"],
                 unsafe_responses=entry["unsafe_responses"],
                 harm_type=entry["harm_type"],
@@ -51,7 +51,7 @@ class Dataset:
         ret = []
         for entry in data["questions"]:
             sample = Sample(
-                query=entry["question"],
+                question=entry["question"],
                 safe_responses=entry["safeAnswers"],
                 unsafe_responses=entry["unsafeAnswers"],
                 harm_type=None,

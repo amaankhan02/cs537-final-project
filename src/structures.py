@@ -13,7 +13,7 @@ class DatasetName(str, Enum):
 @dataclass
 class Sample:
     """Represents a single sample from the dataset, storing the query, safe responses, unsafe responses, and any other relevant information."""
-    query: str
+    question: str
     safe_responses: List[str]
     unsafe_responses: List[str]
     harm_type: Optional[str]
