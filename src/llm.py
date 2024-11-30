@@ -71,9 +71,8 @@ class LlamaMini(BaseLLM):
             max_new_tokens=self.max_new_tokens,  # Adjust as needed
             temperature=self.temperature,
             do_sample=self.do_sample,
-        )[0]["generated_text"]
+        )[0]["generated_text"][-1]['content']
 
-        # TODO: do i need to return response[-1]['content']
         return response
 
     @property
