@@ -30,7 +30,7 @@ class Dataset:
             self._samples = self._load_smarthome_child_safety_data()
 
     def _load_difficult_donotanswer_data(self) -> List[Sample]:
-        with open(self._data_path, "r") as f:
+        with open(self._data_path, "r", encoding='utf-8') as f:
             data = json.load(f)
 
         ret = []
