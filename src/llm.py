@@ -3,8 +3,12 @@ import google.generativeai as genai
 import torch
 from openai import OpenAI
 from transformers import OpenAIGPTConfig, OpenAIGPTModel, pipeline
-from src.structures import ModelName
+from enum import Enum
 
+class ModelName(str, Enum):
+    GPT = "gpt_mini"
+    GEMINI = "gemini"
+    LLAMA = "llama_mini"
 class BaseLLM(ABC):
     """Abstract base class for LLMs."""
 
@@ -67,9 +71,8 @@ class LlamaMini(BaseLLM):
             max_new_tokens=self.max_new_tokens,  # Adjust as needed
             temperature=self.temperature,
             do_sample=self.do_sample,
-        )[0]["generated_text"]
+        )[0]["generated_text"][-1]['content']
 
-        # TODO: do i need to return response[-1]['content']
         return response
 
     @property
@@ -125,6 +128,12 @@ class Gemini(BaseLLM):
     @property
     def name(self) -> ModelName:
         return ModelName.GEMINI
+
+llm_models = {
+    ModelName.GPT.value.lower(): GPTMini,
+    ModelName.GEMINI.value.lower(): Gemini,
+    ModelName.LLAMA.value.lower(): LlamaMini,
+}
 
 def create_llm(model_name: str, system_prompt: str) -> BaseLLM:
     if model_name.lower() not in llm_models:

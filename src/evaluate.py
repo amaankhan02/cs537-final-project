@@ -6,8 +6,8 @@ from typing import List, Optional
 from src.bow_model import BowModel
 from src.constants import judge_system_prompt
 from src.dataset import Dataset
-from src.llm import BaseLLM, create_llm
-from src.structures import DataClassEncoder, ExperimentResult, Label, ModelName
+from src.llm import BaseLLM, create_llm, ModelName
+from src.structures import DataClassEncoder, ExperimentResult, Label
 
 
 class Judge:
