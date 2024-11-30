@@ -22,12 +22,12 @@ def load_rules_file(rules_path: str) -> str:
         return rules
 
 
-def get_save_filepath(experiment_name: str, dataset_name: str, model: str, use_bow: bool) -> str:
+def get_save_filepath(experiment_name: str, dataset_name: str, model: str, use_bow: bool, prompt_number: int) -> str:
     import os
 
     os.makedirs(experiment_outputs_dir, exist_ok=True)
     # TODO: add the dataset name to the filepath
-    return f"{experiment_outputs_dir}/{experiment_name}_{dataset_name}_{model}_bow-{use_bow}_results.json"
+    return f"{experiment_outputs_dir}/{experiment_name}_p{prompt_number}_{dataset_name}_{model}_bow-{use_bow}_results.json"
 
 
 def load_examples_for_prompt(examples_path: str) -> str:
@@ -60,7 +60,7 @@ def initialize_variables(
     judge_model_name: str,
     prompt_injection_number: int,
 ) -> Tuple[str, Dataset, BaseLLM, Optional[BowModel], Judge]:
-    output_filepath: str = get_save_filepath(experiment_name, dataset_name, model, use_bow)
+    output_filepath: str = get_save_filepath(experiment_name, dataset_name, model, use_bow, prompt_injection_number)
     llm_rules: str = (
         load_rules_file(rules_path)
         if prompt_injection_number in PROMPTS_USING_RULES

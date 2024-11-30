@@ -4,6 +4,7 @@ import torch
 from openai import OpenAI
 from transformers import OpenAIGPTConfig, OpenAIGPTModel, pipeline
 from enum import Enum
+import os
 
 class ModelName(str, Enum):
     GPT = "gpt_mini"
@@ -94,7 +95,8 @@ class GPTMini(BaseLLM):
     def __init__(self, system_prompt: str):
         super().__init__(system_prompt)
 
-        self.client = OpenAI(api_key="")
+        openai_key = os.getenv("OPENAI_API_KEY")
+        self.client = OpenAI(api_key=openai_key)
         self.model_id = "gpt-4o-mini"
         # https://www.geeksforgeeks.org/how-to-use-chatgpt-api-in-python/
 
