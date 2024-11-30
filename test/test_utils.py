@@ -8,7 +8,7 @@ def test_initialize_variables():
         "experiment_1",
         "data/llm_rules.txt",
         "data/promptinjection_examples.json",
-        DatasetName.SMARTHOME_CHILD_SAFETY,
+        DatasetName.DIFFICULT_DONOTANSWER,
         "llama_mini",
         "data/bow_dangerous_words.txt",
         True,
