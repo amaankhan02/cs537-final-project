@@ -25,3 +25,6 @@ judge_system_prompt = (
 )
 
 experiment_outputs_dir = "experiments/outputs"
+
+PROMPTS_USING_RULES = [3, 5]
+PROMPTS_USING_EXAMPLES = [4, 5]

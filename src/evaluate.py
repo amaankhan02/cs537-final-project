@@ -11,8 +11,8 @@ from src.structures import DataClassEncoder, ExperimentResult, Label, ModelName
 
 
 class Judge:
-    def __init__(self, model_name: ModelName, rules: List[str]):
-        self._rules: List[str] = rules # rules indicating what are safe and unsafe for children
+    def __init__(self, model_name: ModelName, rules: str):
+        self._rules: str = rules # rules indicating what are safe and unsafe for children
         self._system_prompt: str = self._create_judge_system_prompt()
         self.model: BaseLLM = create_llm(model_name.value, self._system_prompt)
         
