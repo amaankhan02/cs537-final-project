@@ -10,11 +10,6 @@ class DatasetName(str, Enum):
     # the custom dataset that we create ourselves more specific for smart-homes
     SMARTHOME_CHILD_SAFETY = "SmartHomeChildSafety"  # TODO: think of a better name. This is the custom dataset we made
 
-class ModelName(str, Enum):
-    GPT = "GPTMini"
-    GEMINI = "Gemini"
-    LLAMA = "LlamaMini"
-
 @dataclass
 class Sample:
     """Represents a single sample from the dataset, storing the query, safe responses, unsafe responses, and any other relevant information."""

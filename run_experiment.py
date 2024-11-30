@@ -1,15 +1,11 @@
 import argparse
-from typing import List, Optional
-import os
 
-from src.bow_model import BowModel
-from src.constants import llm_models, experiment_outputs_dir, PROMPTS_USING_RULES, PROMPTS_USING_EXAMPLES
-from src.dataset import Dataset, DatasetName
-from src.evaluate import Judge, run_inference_and_eval
-from src.llm import BaseLLM, create_llm
-from src.structures import DatasetName, ModelName
-from src.prompt import generate_prompt
-
+from src.constants import experiment_outputs_dir, PROMPTS_USING_RULES, PROMPTS_USING_EXAMPLES
+from src.dataset import DatasetName
+from src.evaluate import run_inference_and_eval
+from src.structures import DatasetName
+from src.utils import initialize_variables
+from src.llm import llm_models
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run safety evaluation experiment")
@@ -80,43 +76,21 @@ def parse_args() -> argparse.Namespace:
     )
 
     args = parser.parse_args()
-
     return args
 
-def load_rules_file(rules_path: str) -> str:
-    with open(rules_path, 'r') as file:
-        rules = "\n".join([line.strip() for line in file.readlines() if line.strip()])
-        return rules
-
-def get_save_filepath(experiment_name: str) -> str:
-    import os
-
-    os.makedirs(experiment_outputs_dir, exist_ok=True)
-    # TODO: add the dataset name to the filepath
-    return f"{experiment_outputs_dir}/{experiment_name}_{args.dataset}_{args.model}_bow-{args.use_bow}_results.json"
-
-def load_examples_for_prompt(examples_path: str) -> str:
-    if examples_path is None or not os.path.exists(examples_path):
-        raise ValueError(f"Examples path {examples_path} does not exist. It is required for prompt number {args.prompt_injection_number}") 
-    
-    with open(examples_path, "r") as file:
-        return file.read()
-    
-def initialize_variables(args: argparse.Namespace):
-    output_filepath: str = get_save_filepath(args.experiment_name)
-    llm_rules: str = load_rules_file(args.rules_path) if args.prompt_injection_number in PROMPTS_USING_RULES else ""
-    examples_for_prompt: str = load_examples_for_prompt(args.examples_path) if args.prompt_injection_number in PROMPTS_USING_EXAMPLES else ""
-    system_prompt: str = generate_prompt(args.prompt_injection_number, llm_rules, examples_for_prompt)
-    
-    dataset = Dataset(DatasetName(args.dataset))
-    llm_model: BaseLLM = create_llm(args.model, system_prompt)
-    bow_model: Optional[BowModel] = BowModel(args.bow_path, args.danger_threshold) if args.use_bow else None
-    judge: Judge = Judge(ModelName(args.judge_model_name), llm_rules)
-    
-    return output_filepath, dataset, llm_model, bow_model, judge
-
 def main(args: argparse.Namespace):
-    output_filepath, dataset, llm_model, bow_model, judge = initialize_variables(args)
+    output_filepath, dataset, llm_model, bow_model, judge = initialize_variables(
+        args.experiment_name,
+        args.rules_path,
+        args.examples_path,
+        args.dataset,
+        args.model,
+        args.bow_path,
+        args.use_bow,
+        args.danger_threshold,
+        args.judge_model_name,
+        args.prompt_number,
+    )
     run_inference_and_eval(
         args.experiment_name, output_filepath, dataset, llm_model, bow_model, judge
     )
