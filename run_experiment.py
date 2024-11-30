@@ -92,7 +92,7 @@ def main(args: argparse.Namespace):
         args.prompt_number,
     )
     run_inference_and_eval(
-        args.experiment_name, output_filepath, dataset, llm_model, bow_model, judge
+        args.experiment_name, output_filepath, dataset, llm_model, bow_model, judge, args.prompt_number
     )
 
 if __name__ == "__main__":

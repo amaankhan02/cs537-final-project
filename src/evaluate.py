@@ -61,6 +61,7 @@ def run_inference_and_eval(
     llm_model: BaseLLM,
     bow_model: BowModel,
     judge: Judge,
+    prompt_number: int,
 ):
     results: List[Label] = []
     total_times: List[float] = []
@@ -125,6 +126,7 @@ def run_inference_and_eval(
     output = ExperimentResult(
         dataset_name=dataset._name.value,
         model_name=llm_model.name.value,
+        prompt_number=prompt_number,
         system_prompt=llm_model.system_prompt,
         experiment_name=experiment_name,
         use_bow=bow_model is not None,

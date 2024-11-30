@@ -34,6 +34,7 @@ class ExperimentResult:
     """Represents the result of a single experiment. This is what is saved to the JSON file."""
     dataset_name: str
     model_name: str
+    prompt_number: int
     system_prompt: str      # the prompt injections that were used
     experiment_name: str
     use_bow: bool
