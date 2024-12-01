@@ -169,7 +169,7 @@ def rejudge_responses(
     gemini_judge = Judge(ModelName.GEMINI, llm_rules)
     
     y_hats = experiment_data["y_hat"]
-    questions_data = dataset_data["questions"]
+    questions_data = dataset_data["questions"] if dataset_file == dataset_file_paths[DatasetName.SMARTHOME_CHILD_SAFETY] else dataset_data
     safe_responses = "safeAnswers" if dataset_file == dataset_file_paths[DatasetName.SMARTHOME_CHILD_SAFETY] else "safe_responses"
     unsafe_responses = "unsafeAnswers" if dataset_file == dataset_file_paths[DatasetName.SMARTHOME_CHILD_SAFETY] else "unsafe_responses"
     # print(questions_data)

@@ -23,7 +23,6 @@ def parse_args() -> argparse.Namespace:
         "--output_file",
         type=str,
         required=True,
-        choices=llm_models.keys(),
         help="The name of the output file to write to",
     )
 
