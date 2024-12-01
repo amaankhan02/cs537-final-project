@@ -215,6 +215,8 @@ def rejudge_responses(
         total_times.append(total_time)
         bow_times.append(bow_time)
         llm_times.append(llm_time)
+        
+        time.sleep(3) # sleep to avoid rate limit for gemini
 
     accuracy = sum(1 for r in results if r.is_y_hat_safe) / len(results)
 
