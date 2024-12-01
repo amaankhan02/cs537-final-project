@@ -3,7 +3,7 @@ from src.evaluate import rejudge_responses
 from src.structures import DatasetName
 from src.utils import load_rules_file
 from src.llm import llm_models
-
+from src.constants import dataset_file_paths
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run safety evaluation experiment")
     parser.add_argument(
@@ -38,8 +38,8 @@ if __name__ == "__main__":
         load_rules_file("data/llmrules.txt")
     )
     rejudge_responses(
-    experiment_file=args.experiment_path,
-    dataset_file="data/dataset1.json" if args.dataset == "SmartHomeChildSafety" else "data/difficult_donotanswer.json",
-    save_filepath=args.output_file,
-    llm_rules=llm_rules
-)
+        experiment_file=args.experiment_path,
+        dataset_file=dataset_file_paths[DatasetName(args.dataset)],
+        save_filepath=args.output_file,
+        llm_rules=llm_rules
+    )

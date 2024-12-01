@@ -32,13 +32,13 @@ class BaseLLM(ABC):
 
 class LlamaMini(BaseLLM):
     def __init__(
-        self, system_prompt: str, temperature: float = 0, do_sample: bool = False
+        self, system_prompt: str, temperature: float = 0.7, do_sample: bool = True
     ):
         """Load the Llama-3.2-1B-Instruct model and set the system prompt.
 
         Args:
-            temperature (float, optional): Defaults to 0.
-            do_sample (bool, optional): Defaults to False.
+            temperature (float, optional): Defaults to 0.7.
+            do_sample (bool, optional): Defaults to True.
 
             If you want the response to be more for more precise tasks,
             set temperature to 0.0 and do_sample to False.
